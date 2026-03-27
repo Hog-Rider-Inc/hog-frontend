@@ -1,0 +1,258 @@
+package lt.hogfood.hogfood.ui.search
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import lt.hogfood.hogfood.ui.home.getCategoryColor
+import lt.hogfood.hogfood.ui.theme.CardBackground
+import lt.hogfood.hogfood.ui.theme.PrimaryBlue
+import lt.hogfood.hogfood.ui.theme.TextPrimary
+import lt.hogfood.hogfood.ui.theme.TextSecondary
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchScreen(
+    viewModel: SearchViewModel = viewModel()
+) {
+    val results by viewModel.results.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val query by viewModel.query.collectAsState()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
+    val selectedDiet by viewModel.selectedDiet.collectAsState()
+    val categories by viewModel.categories.collectAsState()
+    val dietaryTags by viewModel.dietaryTags.collectAsState()
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        contentPadding = PaddingValues(bottom = 16.dp)
+    ) {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    "Paieška",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                Spacer(Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { viewModel.query.value = it },
+                    placeholder = { Text("Ieškoti patiekalų...", color = TextSecondary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedContainerColor = CardBackground,
+                        focusedContainerColor = CardBackground,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedBorderColor = PrimaryBlue
+                    ),
+                    singleLine = true
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    "MITYBOS FILTRAI",
+                    fontSize = 11.sp,
+                    color = TextSecondary,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+
+        item {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(dietaryTags) { diet ->
+                    FilterChip(
+                        label = diet.title,
+                        selected = selectedDiet?.id == diet.id,
+                        onClick = {
+                            viewModel.setDiet(if (selectedDiet?.id == diet.id) null else diet)
+                        }
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+
+        item {
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Text(
+                    "KATEGORIJOS",
+                    fontSize = 11.sp,
+                    color = TextSecondary,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+
+        item {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(categories) { cat ->
+                    FilterChip(
+                        label = cat.title,
+                        selected = selectedCategory?.id == cat.id,
+                        onClick = {
+                            viewModel.setCategory(if (selectedCategory?.id == cat.id) null else cat)
+                        }
+                    )
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+
+        item {
+            Text(
+                "${results.size} rezultatai",
+                fontSize = 13.sp,
+                color = TextSecondary,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+
+        when {
+            isLoading -> item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = PrimaryBlue)
+                }
+            }
+            results.isEmpty() -> item {
+                Text(
+                    "Nieko nerasta",
+                    color = TextSecondary,
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            else -> items(results) { dish ->
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    DishCardHorizontal(
+                        name = dish.name,
+                        restaurant = dish.restaurantName,
+                        price = "€%.2f".format(dish.price),
+                        categoryColor = getCategoryColor(dish.categories.firstOrNull()?.title),
+                        onClick = {}
+                    )
+                    Spacer(Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(50.dp),
+        color = if (selected) PrimaryBlue else Color(0xFFE6F1FB),
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            color = if (selected) Color.White else TextSecondary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
+}
+
+@Composable
+fun DishCardHorizontal(
+    name: String,
+    restaurant: String,
+    price: String,
+    categoryColor: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = CardBackground,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(72.dp)
+                    .background(categoryColor, RoundedCornerShape(12.dp))
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    name,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
+                )
+                Text(
+                    restaurant,
+                    fontSize = 12.sp,
+                    color = TextSecondary
+                )
+            }
+            Text(
+                price,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextPrimary
+            )
+        }
+    }
+}

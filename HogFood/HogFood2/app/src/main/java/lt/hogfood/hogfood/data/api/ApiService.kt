@@ -1,5 +1,7 @@
 package lt.hogfood.hogfood.data.api
 
+import lt.hogfood.hogfood.data.model.Category
+import lt.hogfood.hogfood.data.model.DietaryTag
 import lt.hogfood.hogfood.data.model.FoodItem
 import lt.hogfood.hogfood.data.model.RecommendationItem
 import retrofit2.Response
@@ -16,6 +18,12 @@ interface FoodApi {
         @Query("categoryId") categoryId: Int? = null,
         @Query("dietaryTagId") dietaryTagId: Int? = null
     ): Response<List<FoodItem>>
+
+    @GET("categories")
+    suspend fun getCategories(): Response<List<Category>>
+
+    @GET("dietary-tags")
+    suspend fun getDietaryTags(): Response<List<DietaryTag>>
 }
 
 interface RecommendApi {
