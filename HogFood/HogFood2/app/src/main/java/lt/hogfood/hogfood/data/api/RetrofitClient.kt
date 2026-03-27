@@ -31,4 +31,11 @@ object RetrofitClient {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(RecommendApi::class.java)
+
+    val interactionApi: InteractionApi = Retrofit.Builder()
+        .baseUrl(RECOMMEND_URL)
+        .client(httpClient)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(InteractionApi::class.java)
 }
