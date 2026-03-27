@@ -3,7 +3,7 @@ package lt.hogfood.hogfood
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import lt.hogfood.hogfood.ui.home.HomeScreen
+import lt.hogfood.hogfood.navigation.AppNavGraph
 import lt.hogfood.hogfood.ui.theme.HogFoodTheme
 
 class MainActivity : ComponentActivity() {
@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             HogFoodTheme {
-                HomeScreen()
+                AppNavGraph()
             }
         }
     }

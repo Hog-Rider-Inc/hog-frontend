@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,45 +67,20 @@ fun HomeScreen(
             .background(Color.White),
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
-        // Header
+        // Header with app name
         item {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
                     .statusBarsPadding()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                contentAlignment = Alignment.CenterStart
             ) {
-                Spacer(Modifier.height(16.dp))
                 Text(
-                    "Ko nori pavalgyti?",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    text = "Ready to eat like a Hog?",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = PrimaryBlue
                 )
-                Spacer(Modifier.height(12.dp))
-                Surface(
-                    onClick = onSearchClick,
-                    shape = RoundedCornerShape(12.dp),
-                    color = CardBackground,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("🔍", fontSize = 14.sp)
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            "Ieškoti patiekalų...",
-                            color = TextSecondary,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-                Spacer(Modifier.height(24.dp))
             }
         }
 
