@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import lt.hogfood.hogfood.ui.home.HomeScreen
+import lt.hogfood.hogfood.ui.search.SearchScreen
 import lt.hogfood.hogfood.ui.theme.PrimaryBlue
 import lt.hogfood.hogfood.ui.theme.TextSecondary
 
@@ -80,8 +81,7 @@ fun AppNavGraph() {
                 )
             }
             composable("search") {
-                // SearchScreen bus vėliau
-                HomeScreen()
+                SearchScreen()
             }
             composable("favorites") {
                 // FavoritesScreen bus vėliau

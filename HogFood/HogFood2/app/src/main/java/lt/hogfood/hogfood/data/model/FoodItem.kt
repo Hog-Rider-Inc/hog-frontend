@@ -6,6 +6,7 @@ data class FoodItem(
     val restaurantName: String = "",
     val price: Double = 0.0,
     val imageUrl: String? = null,
+    val rating: Double = 4.5, // Pridėtas numatytasis rating
     val categories: List<Category> = emptyList(),
     val dietaryTags: List<DietaryTag> = emptyList()
 )
