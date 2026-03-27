@@ -208,12 +208,6 @@ fun RecommendationCardSimple(rec: RecommendationItem) {
                     color = Color(0xFFE6F1FB),
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    Text(
-                        "✦ AI",
-                        fontSize = 10.sp,
-                        color = PrimaryBlue,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
                 }
             }
             Column(modifier = Modifier.padding(10.dp)) {
