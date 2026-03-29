@@ -5,14 +5,14 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import lt.hogfood.hogfood.data.mock.mockRecommendations
 import lt.hogfood.hogfood.data.model.FoodItem
 import lt.hogfood.hogfood.data.model.RecommendationItem
 import lt.hogfood.hogfood.data.repository.FoodRepository
-import lt.hogfood.hogfood.data.mock.mockRecommendations
 
-class HomeViewModel : ViewModel() {
-
-    private val repository = FoodRepository()
+class HomeViewModel(
+    private val repository: FoodRepository = FoodRepository()
+) : ViewModel() {
 
     private val _foodItems = MutableStateFlow<List<FoodItem>>(emptyList())
     val foodItems: StateFlow<List<FoodItem>> = _foodItems
