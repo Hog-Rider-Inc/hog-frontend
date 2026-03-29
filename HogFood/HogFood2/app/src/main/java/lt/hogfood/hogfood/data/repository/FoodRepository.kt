@@ -1,6 +1,7 @@
 package lt.hogfood.hogfood.data.repository
 
 import lt.hogfood.hogfood.data.api.RetrofitClient
+import lt.hogfood.hogfood.data.model.DishDetails
 import lt.hogfood.hogfood.data.model.FoodItem
 import lt.hogfood.hogfood.data.model.RecommendationItem
 
@@ -13,6 +14,11 @@ class FoodRepository {
     suspend fun getAllDishes(): Result<List<FoodItem>> = runCatching {
         val response = foodApi.searchDishes()
         response.body() ?: error("Tuščias atsakymas")
+    }
+
+    suspend fun getDishById(id: Int): Result<DishDetails> = runCatching {
+        val response = foodApi.getDishById(id)
+        response.body() ?: error("Patiekalas nerastas")
     }
 
     suspend fun getRecommendations(): Result<List<RecommendationItem>> = runCatching {
