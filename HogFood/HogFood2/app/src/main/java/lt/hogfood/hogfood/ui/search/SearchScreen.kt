@@ -133,7 +133,7 @@ fun SearchScreen(
                         name = dish.name,
                         restaurant = dish.restaurantName,
                         price = "€%.2f".format(dish.price),
-                        categoryColor = getCategoryColor(dish.categories.firstOrNull()?.title),
+                        categoryColor = getCategoryColor(dish.name),
                         onClick = { onDishClick(dish.id) }
                     )
                     Spacer(Modifier.height(8.dp))
