@@ -35,21 +35,21 @@ class HomeViewModel(
             _isLoading.value = true
             _error.value = null
 
-            android.util.Log.d("HomeViewModel", "Kraunami patiekalai...")
+            println("Kraunami patiekalai...")
             repository.getAllDishes()
                 .onSuccess {
-                    android.util.Log.d("HomeViewModel", "Patiekalai gauti: ${it.size}")
+                    println("Patiekalai gauti: ${it.size}")
                     _foodItems.value = it
                 }
                 .onFailure {
-                    android.util.Log.e("HomeViewModel", "Patiekalų klaida: ${it.message}")
+                    println("Patiekalų klaida: ${it.message}")
                     _error.value = it.message
                 }
 
-            android.util.Log.d("HomeViewModel", "Kraunamos rekomendacijos...")
+            println("Kraunamos rekomendacijos...")
             repository.getRecommendations()
                 .onSuccess {
-                    android.util.Log.d("HomeViewModel", "Rekomendacijos gautos: ${it.size}")
+                    println("Rekomendacijos gautos: ${it.size}")
                     _recommendations.value = it
                 }
                 .onFailure {
