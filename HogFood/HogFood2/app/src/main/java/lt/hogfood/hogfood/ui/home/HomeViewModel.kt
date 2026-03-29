@@ -5,14 +5,14 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import lt.hogfood.hogfood.data.mock.mockRecommendations
 import lt.hogfood.hogfood.data.model.FoodItem
 import lt.hogfood.hogfood.data.model.RecommendationItem
 import lt.hogfood.hogfood.data.repository.FoodRepository
-import lt.hogfood.hogfood.data.mock.mockRecommendations
 
-class HomeViewModel : ViewModel() {
-
-    private val repository = FoodRepository()
+class HomeViewModel(
+    private val repository: FoodRepository = FoodRepository()
+) : ViewModel() {
 
     private val _foodItems = MutableStateFlow<List<FoodItem>>(emptyList())
     val foodItems: StateFlow<List<FoodItem>> = _foodItems
@@ -35,21 +35,21 @@ class HomeViewModel : ViewModel() {
             _isLoading.value = true
             _error.value = null
 
-            android.util.Log.d("HomeViewModel", "Kraunami patiekalai...")
+            println("Kraunami patiekalai...")
             repository.getAllDishes()
                 .onSuccess {
-                    android.util.Log.d("HomeViewModel", "Patiekalai gauti: ${it.size}")
+                    println("Patiekalai gauti: ${it.size}")
                     _foodItems.value = it
                 }
                 .onFailure {
-                    android.util.Log.e("HomeViewModel", "Patiekalų klaida: ${it.message}")
+                    println("Patiekalų klaida: ${it.message}")
                     _error.value = it.message
                 }
 
-            android.util.Log.d("HomeViewModel", "Kraunamos rekomendacijos...")
+            println("Kraunamos rekomendacijos...")
             repository.getRecommendations()
                 .onSuccess {
-                    android.util.Log.d("HomeViewModel", "Rekomendacijos gautos: ${it.size}")
+                    println("Rekomendacijos gautos: ${it.size}")
                     _recommendations.value = it
                 }
                 .onFailure {

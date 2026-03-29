@@ -1,0 +1,38 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x HogFood/HogFood2/gradlew
+
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > HogFood/HogFood2/local.properties
+          echo "RECOMMENDATIONS_BEARER_TOKEN=${{ secrets.BEARER_TOKEN }}" >> HogFood/HogFood2/local.properties
+
+      - name: Run unit tests
+        run: cd HogFood/HogFood2 && ./gradlew test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: HogFood/HogFood2/app/build/reports/tests/
