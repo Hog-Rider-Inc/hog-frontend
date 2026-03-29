@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -28,6 +29,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,6 +63,7 @@ fun DishDetailScreen(
     val dish by viewModel.dish.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
+    var quantity by remember { mutableIntStateOf(1) }
 
     Column(
         modifier = Modifier
@@ -156,35 +161,76 @@ fun DishDetailScreen(
                     }
                 }
 
-                // Apačios juosta — mygtukas
+                // Bottom bar — quantity + add to cart
                 Surface(
                     color = Color.White,
                     shadowElevation = 8.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .navigationBarsPadding()
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Quantity selector — pill shaped background
+                        Surface(
+                            shape = RoundedCornerShape(50.dp),
+                            color = CardBackground
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Surface(
+                                    onClick = { if (quantity > 1) quantity-- },
+                                    shape = CircleShape,
+                                    color = Color.White,
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text("-", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                                    }
+                                }
+                                Text(
+                                    "$quantity",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextPrimary,
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                )
+                                Surface(
+                                    onClick = { quantity++ },
+                                    shape = CircleShape,
+                                    color = Color.White,
+                                    modifier = Modifier.size(36.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(Icons.Default.Add, contentDescription = "Add", tint = TextPrimary, modifier = Modifier.size(18.dp))
+                                    }
+                                }
+                            }
+                        }
+
+                        // Add to cart button
                         Surface(
                             onClick = {
-                                cartViewModel.addToCart(d, 1)
+                                cartViewModel.addToCart(d, quantity)
                                 onBack()
                             },
                             shape = RoundedCornerShape(50.dp),
-                            color = PrimaryBlue,
-                            modifier = Modifier.fillMaxWidth()
+                            color = PrimaryBlue
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    "Į krepšelį",
-                                    color = Color.White,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 15.sp,
-                                    modifier = Modifier.padding(vertical = 14.dp)
-                                )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Text("Į krepšelį", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                                Text("€%.2f".format(d.price * quantity), color = Color.White.copy(alpha = 0.85f), fontWeight = FontWeight.Medium, fontSize = 15.sp)
                             }
                         }
                     }
