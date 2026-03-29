@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import lt.hogfood.hogfood.ui.home.getCategoryColor
+import lt.hogfood.hogfood.ui.home.fixGithubUrl
 import lt.hogfood.hogfood.ui.theme.CardBackground
 import lt.hogfood.hogfood.ui.theme.PrimaryBlue
 import lt.hogfood.hogfood.ui.theme.TextPrimary
@@ -76,7 +77,7 @@ fun DishDetailScreen(
             dish != null -> {
                 val d = dish!!
                 val color = getCategoryColor(d.categories.firstOrNull())
-                val imageUrl = d.images.firstOrNull()
+                val imageUrl = fixGithubUrl(d.images.firstOrNull())
 
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
 

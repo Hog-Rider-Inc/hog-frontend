@@ -6,7 +6,7 @@ data class FoodItem(
     val restaurantName: String = "",
     val price: Double = 0.0,
     val imageUrl: String? = null,
-    val rating: Double = 4.5, // Pridėtas numatytasis rating
+    val rating: Double = 4.5,
     val categories: List<Category> = emptyList(),
     val dietaryTags: List<DietaryTag> = emptyList()
 )
@@ -29,4 +29,15 @@ data class RecommendationItem(
     val image_url: String? = null,
     val categories: List<String> = emptyList(),
     val dietary_tags: List<String> = emptyList()
+)
+
+data class DishDetails(
+    val id: Int = 0,
+    val name: String = "",
+    val description: String = "",
+    val price: Double = 0.0,
+    val restaurantName: String = "",
+    val images: List<String> = emptyList(),
+    val categories: List<String> = emptyList(),
+    val dietaryTags: List<String> = emptyList()
 )
