@@ -41,3 +41,20 @@ data class DishDetails(
     val categories: List<String> = emptyList(),
     val dietaryTags: List<String> = emptyList()
 )
+
+data class Order(
+    val id: Int = 0,
+    val status: String = "",
+    val totalPrice: Double = 0.0,
+    val createdAt: String = "",
+    val updatedAt: String = "",
+    val clientName: String = "",
+    val address: String = "",
+    val items: List<OrderItem> = emptyList()
+)
+
+data class OrderItem(
+    val name: String = "",
+    val quantity: Int = 1,
+    val price: Double = 0.0
+)

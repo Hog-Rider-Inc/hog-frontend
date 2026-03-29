@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import lt.hogfood.hogfood.ui.detail.DishDetailScreen
+import lt.hogfood.hogfood.ui.history.OrderHistoryScreen
 import lt.hogfood.hogfood.ui.home.HomeScreen
 import lt.hogfood.hogfood.ui.search.SearchScreen
 import lt.hogfood.hogfood.ui.swipe.SwipeScreen
@@ -27,7 +28,7 @@ data class NavItem(val route: String, val label: String, val icon: String)
 val navItems = listOf(
     NavItem("home", "Pradžia", "⌂"),
     NavItem("search", "Paieška", "⌕"),
-    NavItem("favorites", "Mėgstami", "♡"),
+    NavItem("history", "Istorija", "⧗"),
     NavItem("recommend", "Tau patiks", "✦"),
 )
 
@@ -93,8 +94,8 @@ fun AppNavGraph() {
             composable("search") {
                 SearchScreen(onDishClick = { dishId -> navController.navigate("dish/$dishId") })
             }
-            composable("favorites") {
-                HomeScreen()
+            composable("history") {
+                OrderHistoryScreen()
             }
             composable("recommend") {
                 SwipeScreen()
