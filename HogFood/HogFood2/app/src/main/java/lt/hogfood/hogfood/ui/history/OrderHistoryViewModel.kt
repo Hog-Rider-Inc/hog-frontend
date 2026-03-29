@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import lt.hogfood.hogfood.data.model.Order
 import lt.hogfood.hogfood.data.repository.FoodRepository
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 class OrderHistoryViewModel : ViewModel() {
 
@@ -23,6 +25,19 @@ class OrderHistoryViewModel : ViewModel() {
 
     init {
         loadOrders()
+        startPolling()
+    }
+
+    private fun startPolling() {
+        viewModelScope.launch {
+            while (isActive) {
+                delay(10_000)
+                val newOrders = repository.getOrders(clientId = 1).getOrNull()
+                if (newOrders != null && newOrders != _orders.value) {
+                    _orders.value = newOrders
+                }
+            }
+        }
     }
 
     fun loadOrders() {
