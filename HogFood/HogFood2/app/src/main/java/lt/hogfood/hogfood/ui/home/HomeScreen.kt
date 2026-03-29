@@ -44,13 +44,14 @@ import lt.hogfood.hogfood.ui.theme.TextPrimary
 import lt.hogfood.hogfood.ui.theme.TextSecondary
 
 fun getCategoryColor(category: String?): Color {
-    return when (category?.lowercase()) {
-        "sriubos" -> Color(0xFF1D9E75)
-        "karštieji", "karstieji" -> Color(0xFF7F77DD)
-        "desertai" -> Color(0xFFD4537E)
-        "užkandžiai", "uzkandziai" -> Color(0xFFBA7517)
-        "burgeriai" -> Color(0xFFD85A30)
-        "picos" -> Color(0xFF185FA5)
+    return when {
+        category == null -> Color(0xFF7F77DD)
+        category.lowercase().contains("sriub") -> Color(0xFF1D9E75)
+        category.lowercase().contains("pic") -> Color(0xFF185FA5)
+        category.lowercase().contains("desert") || category.lowercase().contains("tort") || category.lowercase().contains("pyrag") -> Color(0xFFD4537E)
+        category.lowercase().contains("burger") || category.lowercase().contains("mėsain") -> Color(0xFFD85A30)
+        category.lowercase().contains("užkand") || category.lowercase().contains("salotos") -> Color(0xFFBA7517)
+        category.lowercase().contains("suši") || category.lowercase().contains("rolin") || category.lowercase().contains("nigiri") -> Color(0xFF2196A6)
         else -> Color(0xFF7F77DD)
     }
 }
