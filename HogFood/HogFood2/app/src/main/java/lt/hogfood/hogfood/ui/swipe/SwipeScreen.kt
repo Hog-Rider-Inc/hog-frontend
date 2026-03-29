@@ -29,12 +29,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import lt.hogfood.hogfood.data.model.RecommendationItem
+import coil.compose.AsyncImage
+import lt.hogfood.hogfood.ui.home.fixGithubUrl
 import lt.hogfood.hogfood.ui.home.getCategoryColor
 import lt.hogfood.hogfood.ui.theme.CardBackground
 import lt.hogfood.hogfood.ui.theme.HeartRed
@@ -139,6 +142,7 @@ fun SwipeScreen(viewModel: SwipeViewModel = viewModel()) {
 @Composable
 fun SwipeCard(item: RecommendationItem, modifier: Modifier = Modifier) {
     val color = getCategoryColor(item.categories.firstOrNull())
+    val imageUrl = fixGithubUrl(item.image_url)
 
     Surface(
         shape = RoundedCornerShape(24.dp),
@@ -155,6 +159,14 @@ fun SwipeCard(item: RecommendationItem, modifier: Modifier = Modifier) {
                     .background(color, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
                 contentAlignment = Alignment.TopStart
             ) {
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = item.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
                 // Match badge
                 Surface(
                     shape = RoundedCornerShape(50.dp),
