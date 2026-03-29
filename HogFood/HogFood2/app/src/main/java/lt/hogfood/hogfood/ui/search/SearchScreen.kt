@@ -28,12 +28,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import lt.hogfood.hogfood.ui.home.getCategoryColor
 import lt.hogfood.hogfood.ui.theme.CardBackground
@@ -43,8 +46,13 @@ import lt.hogfood.hogfood.ui.theme.TextSecondary
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun SearchScreen(
     onDishClick: (Int) -> Unit = {},
@@ -58,92 +66,121 @@ fun SearchScreen(
     val categories by viewModel.categories.collectAsState()
     val dietaryTags by viewModel.dietaryTags.collectAsState()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().background(Color.White),
-        contentPadding = PaddingValues(bottom = 16.dp)
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isLoading,
+        onRefresh = { viewModel.refresh() }
+    )
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .pullRefresh(pullRefreshState)
     ) {
-        item {
-            Column(modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 16.dp)) {
-                Spacer(Modifier.height(16.dp))
-                Text("Paieška", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { viewModel.query.value = it },
-                    placeholder = { Text("Ieškoti patiekalų...", color = TextSecondary) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = CardBackground,
-                        focusedContainerColor = CardBackground,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedBorderColor = PrimaryBlue
-                    ),
-                    singleLine = true
-                )
-                Spacer(Modifier.height(16.dp))
-                Text("MITYBOS FILTRAI", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(8.dp))
-            }
-        }
-
-        item {
-            LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(dietaryTags) { diet ->
-                    FilterChip(label = diet.title, selected = selectedDiet?.id == diet.id, onClick = {
-                        viewModel.setDiet(if (selectedDiet?.id == diet.id) null else diet)
-                    })
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-        }
-
-        item {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text("KATEGORIJOS", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(8.dp))
-            }
-        }
-
-        item {
-            LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(categories) { cat ->
-                    FilterChip(label = cat.title, selected = selectedCategory?.id == cat.id, onClick = {
-                        viewModel.setCategory(if (selectedCategory?.id == cat.id) null else cat)
-                    })
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-        }
-
-        item {
-            Text("${results.size} rezultatai", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(horizontal = 16.dp))
-            Spacer(Modifier.height(12.dp))
-        }
-
-        when {
-            isLoading -> item {
-                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = PrimaryBlue)
-                }
-            }
-            results.isEmpty() -> item {
-                Text("Nieko nerasta", color = TextSecondary, fontSize = 13.sp, modifier = Modifier.padding(16.dp))
-            }
-            else -> items(results) { dish ->
-                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    DishCardHorizontal(
-                        name = dish.name,
-                        restaurant = dish.restaurantName,
-                        price = "€%.2f".format(dish.price),
-                        categoryColor = getCategoryColor(dish.name),
-                        imageUrl = dish.imageUrl,
-                        onClick = { onDishClick(dish.id) }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().background(Color.White),
+            contentPadding = PaddingValues(bottom = 16.dp)
+        ) {
+            item {
+                Column(modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 16.dp)) {
+                    Spacer(Modifier.height(16.dp))
+                    Text("Paieška", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { viewModel.query.value = it },
+                        placeholder = { Text("Ieškoti patiekalų...", color = TextSecondary) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedContainerColor = CardBackground,
+                            focusedContainerColor = CardBackground,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedBorderColor = PrimaryBlue
+                        ),
+                        singleLine = true
                     )
+                    Spacer(Modifier.height(16.dp))
+                    Text("MITYBOS FILTRAI", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(8.dp))
                 }
             }
+
+            item {
+                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(dietaryTags) { diet ->
+                        FilterChip(label = diet.title, selected = selectedDiet?.id == diet.id, onClick = {
+                            viewModel.setDiet(if (selectedDiet?.id == diet.id) null else diet)
+                        })
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+
+            item {
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text("KATEGORIJOS", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(8.dp))
+                }
+            }
+
+            item {
+                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(categories) { cat ->
+                        FilterChip(label = cat.title, selected = selectedCategory?.id == cat.id, onClick = {
+                            viewModel.setCategory(if (selectedCategory?.id == cat.id) null else cat)
+                        })
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+
+            item {
+                Text("${results.size} rezultatai", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(horizontal = 16.dp))
+                Spacer(Modifier.height(12.dp))
+            }
+
+            when {
+                isLoading -> item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = PrimaryBlue)
+                    }
+                }
+                results.isEmpty() -> item {
+                    Text("Nieko nerasta", color = TextSecondary, fontSize = 13.sp, modifier = Modifier.padding(16.dp))
+                }
+                else -> items(results) { dish ->
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        DishCardHorizontal(
+                            name = dish.name,
+                            restaurant = dish.restaurantName,
+                            price = "€%.2f".format(dish.price),
+                            categoryColor = getCategoryColor(dish.name),
+                            imageUrl = dish.imageUrl,
+                            onClick = { onDishClick(dish.id) }
+                        )
+                        Spacer(Modifier.height(8.dp))
+                    }
+                }
+            }
         }
+
+        PullRefreshIndicator(
+            refreshing = isLoading,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }
 

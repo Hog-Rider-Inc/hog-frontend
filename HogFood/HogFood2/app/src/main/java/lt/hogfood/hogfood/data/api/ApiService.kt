@@ -5,8 +5,10 @@ import lt.hogfood.hogfood.data.model.DietaryTag
 import lt.hogfood.hogfood.data.model.DishDetails
 import lt.hogfood.hogfood.data.model.FoodItem
 import lt.hogfood.hogfood.data.model.Order
+import lt.hogfood.hogfood.data.model.OrderRequest
 import lt.hogfood.hogfood.data.model.RecommendationItem
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -32,10 +34,16 @@ interface FoodApi {
     @GET("dietary-tags")
     suspend fun getDietaryTags(): Response<List<DietaryTag>>
 
-    @GET("users/{clientId}/orders")
+    @GET("users/{userId}/orders")
     suspend fun getOrders(
-        @Path("clientId") clientId: Int
+        @Path("userId") userId: Int
     ): Response<List<Order>>
+
+    @POST("users/{userId}/order")
+    suspend fun placeOrder(
+        @Path("userId") userId: Int,
+        @Body request: OrderRequest
+    ): Response<Unit>
 }
 
 interface RecommendApi {
@@ -66,6 +74,4 @@ interface InteractionApi {
         @Path("itemId") itemId: Int,
         @Header("Authorization") token: String = "Bearer c03cba224d42f06b6f964de1978f21ecfc7493c83a935d9dffcde65c7fc6ecde"
     ): Response<Unit>
-
 }
-

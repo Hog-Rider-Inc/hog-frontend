@@ -27,6 +27,7 @@ data class RecommendationItem(
     val restaurant_name: String = "",
     val price: String = "",
     val image_url: String? = null,
+    val description: String = "",
     val categories: List<String> = emptyList(),
     val dietary_tags: List<String> = emptyList()
 )
@@ -66,4 +67,13 @@ data class CartItem(
     val price: Double,
     val imageUrl: String?,
     val quantity: Int = 1
+)
+
+data class OrderRequest(
+    val orderedMenuItems: List<OrderedMenuItem> = emptyList()
+)
+
+data class OrderedMenuItem(
+    val id: Int,
+    val quantity: Int
 )
