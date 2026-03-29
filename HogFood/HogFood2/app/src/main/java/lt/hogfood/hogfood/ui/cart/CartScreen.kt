@@ -103,19 +103,49 @@ fun CartScreen(cartViewModel: CartViewModel) {
                         .navigationBarsPadding()
                         .padding(16.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    // Summary card
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = CardBackground,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Viso:", fontSize = 16.sp, color = TextSecondary)
-                        Text(
-                            "€%.2f".format(cartViewModel.totalPrice),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                "Užsakymo suvestinė",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
+                            )
+                            Spacer(Modifier.height(12.dp))
+
+                            val subtotal = cartViewModel.totalPrice
+                            val delivery = 2.99
+                            val serviceFee = 0.99
+                            val total = subtotal + delivery + serviceFee
+
+                            SummaryRow("Tarpinė suma", subtotal)
+                            Spacer(Modifier.height(6.dp))
+                            SummaryRow("Pristatymas", delivery)
+                            Spacer(Modifier.height(6.dp))
+                            SummaryRow("Aptarnavimo mokestis", serviceFee)
+                            Spacer(Modifier.height(12.dp))
+
+                            // Divider
+                            androidx.compose.material3.HorizontalDivider(color = Color(0xFFE0E0E0))
+                            Spacer(Modifier.height(12.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Viso:", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                                Text("€%.2f".format(total), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            }
+                        }
                     }
+
                     Spacer(Modifier.height(12.dp))
+
                     Surface(
                         onClick = { /* užsakymas bus vėliau */ },
                         shape = RoundedCornerShape(50.dp),
@@ -124,7 +154,7 @@ fun CartScreen(cartViewModel: CartViewModel) {
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
-                                "Užsakyti",
+                                "Užsakyti · €%.2f".format(cartViewModel.totalPrice + 2.99 + 0.99),
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
@@ -193,5 +223,16 @@ fun CartItemRow(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun SummaryRow(label: String, amount: Double) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(label, fontSize = 13.sp, color = TextSecondary)
+        Text("€%.2f".format(amount), fontSize = 13.sp, color = TextSecondary)
     }
 }
