@@ -26,7 +26,7 @@ data class NavItem(val route: String, val label: String, val icon: String)
 val navItems = listOf(
     NavItem("home", "Pradžia", "⌂"),
     NavItem("search", "Paieška", "⌕"),
-    NavItem("favorites", "Mėgstami", "♡"),
+    NavItem("history", "Istorija", "⧗"),
     NavItem("recommend", "Tau patiks", "✦"),
 )
 
