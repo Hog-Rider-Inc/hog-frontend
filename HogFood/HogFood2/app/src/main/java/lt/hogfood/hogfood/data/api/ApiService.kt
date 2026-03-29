@@ -17,8 +17,8 @@ interface FoodApi {
     @GET("dishes/search")
     suspend fun searchDishes(
         @Query("q") query: String = "",
-        @Query("categoryId") categoryId: Int? = null,
-        @Query("dietaryTagId") dietaryTagId: Int? = null
+        @Query("category") category: String? = null,
+        @Query("dietary") dietary: String? = null
     ): Response<List<FoodItem>>
 
     @GET("dishes/{id}")
