@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import lt.hogfood.hogfood.ui.cart.CartViewModel
 import lt.hogfood.hogfood.ui.home.getCategoryColor
 import lt.hogfood.hogfood.ui.home.fixGithubUrl
 import lt.hogfood.hogfood.ui.theme.CardBackground
@@ -46,6 +49,7 @@ import lt.hogfood.hogfood.ui.theme.TextSecondary
 fun DishDetailScreen(
     dishId: Int,
     onBack: () -> Unit,
+    cartViewModel: CartViewModel,
     viewModel: DishDetailViewModel = viewModel()
 ) {
     LaunchedEffect(dishId) {
@@ -79,14 +83,10 @@ fun DishDetailScreen(
                 val color = getCategoryColor(d.categories.firstOrNull())
                 val imageUrl = fixGithubUrl(d.images.firstOrNull())
 
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
 
-                    // Viršutinė zona — nuotrauka arba spalvota
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(280.dp)
-                    ) {
+                    // Viršutinė zona
+                    Box(modifier = Modifier.fillMaxWidth().height(280.dp)) {
                         if (imageUrl != null) {
                             AsyncImage(
                                 model = imageUrl,
@@ -94,19 +94,9 @@ fun DishDetailScreen(
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
                             )
-                            // Tamsus overlay kad mygtukas matytųsi
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.15f))
-                            )
+                            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.15f)))
                         } else {
-                            // Jei nuotraukos nėra — spalvota zona
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(color)
-                            )
+                            Box(modifier = Modifier.fillMaxSize().background(color))
                         }
 
                         // Atgal mygtukas
@@ -114,54 +104,27 @@ fun DishDetailScreen(
                             onClick = onBack,
                             shape = CircleShape,
                             color = Color.White.copy(alpha = 0.9f),
-                            modifier = Modifier
-                                .statusBarsPadding()
-                                .padding(12.dp)
-                                .size(40.dp)
+                            modifier = Modifier.statusBarsPadding().padding(12.dp).size(40.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Atgal",
-                                    tint = TextPrimary,
-                                    modifier = Modifier.size(20.dp)
-                                )
+                                Icon(Icons.Default.ArrowBack, contentDescription = "Atgal", tint = TextPrimary, modifier = Modifier.size(20.dp))
                             }
                         }
                     }
 
                     // Informacija
                     Column(modifier = Modifier.padding(16.dp)) {
-
-                        // Pavadinimas ir kaina
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.Top
                         ) {
-                            Text(
-                                d.name,
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextPrimary,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Text(
-                                "€%.2f".format(d.price),
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextPrimary
-                            )
+                            Text(d.name, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextPrimary, modifier = Modifier.weight(1f))
+                            Text("€%.2f".format(d.price), fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                         }
 
                         Spacer(Modifier.height(4.dp))
-
-                        Text(
-                            "Restoranas: ${d.restaurantName}",
-                            fontSize = 14.sp,
-                            color = TextSecondary
-                        )
-
+                        Text("Restoranas: ${d.restaurantName}", fontSize = 14.sp, color = TextSecondary)
                         Spacer(Modifier.height(16.dp))
 
                         // Kategorijos ir mitybos žymos
@@ -180,23 +143,50 @@ fun DishDetailScreen(
                             }
                         }
 
-                        // Aprašymas
                         if (d.description.isNotEmpty()) {
                             Spacer(Modifier.height(20.dp))
                             Text("Aprašymas", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                             Spacer(Modifier.height(8.dp))
                             Surface(shape = RoundedCornerShape(12.dp), color = CardBackground, modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    d.description,
-                                    fontSize = 14.sp,
-                                    color = TextSecondary,
-                                    lineHeight = 22.sp,
-                                    modifier = Modifier.padding(12.dp)
-                                )
+                                Text(d.description, fontSize = 14.sp, color = TextSecondary, lineHeight = 22.sp, modifier = Modifier.padding(12.dp))
                             }
                         }
 
-                        Spacer(Modifier.height(24.dp))
+                        Spacer(Modifier.height(100.dp))
+                    }
+                }
+
+                // Apačios juosta — mygtukas
+                Surface(
+                    color = Color.White,
+                    shadowElevation = 8.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                    ) {
+                        Surface(
+                            onClick = {
+                                cartViewModel.addToCart(d, 1)
+                                onBack()
+                            },
+                            shape = RoundedCornerShape(50.dp),
+                            color = PrimaryBlue,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    "Į krepšelį",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 15.sp,
+                                    modifier = Modifier.padding(vertical = 14.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
