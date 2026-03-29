@@ -29,11 +29,11 @@ import lt.hogfood.hogfood.ui.theme.TextSecondary
 data class NavItem(val route: String, val label: String, val icon: String)
 
 val navItems = listOf(
-    NavItem("home", "Pradžia", "⌂"),
-    NavItem("search", "Paieška", "⌕"),
-    NavItem("cart", "Krepšelis", "🛒"),
-    NavItem("history", "Istorija", "⧗"),
-    NavItem("recommend", "Tau patiks", "✦"),
+    NavItem("home", "Pradžia", "\uD83C\uDFE0"),
+    NavItem("search", "Paieška", "\uD83D\uDD0D"),
+    NavItem("cart", "Krepšelis", "\uD83D\uDED2"),
+    NavItem("history", "Istorija", "\uD83D\uDD52"),
+    NavItem("recommend", "Tau patiks", "✨"),
 )
 
 val routesWithoutBottomBar = listOf("dish")
