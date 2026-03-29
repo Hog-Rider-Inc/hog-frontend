@@ -2,6 +2,8 @@ package lt.hogfood.hogfood.ui.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -133,7 +135,11 @@ fun DishDetailScreen(
                         Spacer(Modifier.height(16.dp))
 
                         // Kategorijos ir mitybos žymos
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        @OptIn(ExperimentalLayoutApi::class)
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             d.categories.forEach { category ->
                                 Surface(shape = RoundedCornerShape(50.dp), color = color.copy(alpha = 0.15f)) {
                                     Text(category, fontSize = 12.sp, color = color, fontWeight = FontWeight.Medium,
