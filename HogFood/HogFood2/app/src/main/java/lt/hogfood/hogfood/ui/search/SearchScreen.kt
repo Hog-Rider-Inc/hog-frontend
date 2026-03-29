@@ -40,6 +40,9 @@ import lt.hogfood.hogfood.ui.theme.CardBackground
 import lt.hogfood.hogfood.ui.theme.PrimaryBlue
 import lt.hogfood.hogfood.ui.theme.TextPrimary
 import lt.hogfood.hogfood.ui.theme.TextSecondary
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,6 +137,7 @@ fun SearchScreen(
                         restaurant = dish.restaurantName,
                         price = "€%.2f".format(dish.price),
                         categoryColor = getCategoryColor(dish.name),
+                        imageUrl = dish.imageUrl,
                         onClick = { onDishClick(dish.id) }
                     )
                     Spacer(Modifier.height(8.dp))
@@ -151,10 +155,21 @@ fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun DishCardHorizontal(name: String, restaurant: String, price: String, categoryColor: Color, onClick: () -> Unit) {
+fun DishCardHorizontal(name: String, restaurant: String, price: String, categoryColor: Color, imageUrl: String?, onClick: () -> Unit) {
     Surface(shape = RoundedCornerShape(16.dp), color = CardBackground, modifier = Modifier.fillMaxWidth().clickable { onClick() }) {
         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(72.dp).background(categoryColor, RoundedCornerShape(12.dp)))
+            Box(
+                modifier = Modifier.size(72.dp).background(categoryColor, RoundedCornerShape(12.dp))
+            ) {
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp))
+                    )
+                }
+            }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
