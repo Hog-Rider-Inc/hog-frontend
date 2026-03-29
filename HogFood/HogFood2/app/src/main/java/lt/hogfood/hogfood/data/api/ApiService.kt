@@ -32,7 +32,7 @@ interface FoodApi {
     @GET("dietary-tags")
     suspend fun getDietaryTags(): Response<List<DietaryTag>>
 
-    @GET("orders/client/{clientId}")
+    @GET("clients/{clientId}/orders")
     suspend fun getOrders(
         @Path("clientId") clientId: Int
     ): Response<List<Order>>

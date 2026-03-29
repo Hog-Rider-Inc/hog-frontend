@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    private const val BASE_URL = "http://10.0.2.2:8080/api/"
+    private const val BASE_URL = "https://hog-backend-qwqa.onrender.com/api/"
     private const val RECOMMEND_URL = "https://svc-recommender-latest.onrender.com/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
