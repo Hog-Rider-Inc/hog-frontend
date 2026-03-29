@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import lt.hogfood.hogfood.ui.detail.DishDetailScreen
 import lt.hogfood.hogfood.ui.home.HomeScreen
 import lt.hogfood.hogfood.ui.search.SearchScreen
 import lt.hogfood.hogfood.ui.swipe.SwipeScreen
@@ -30,43 +31,50 @@ val navItems = listOf(
     NavItem("recommend", "Tau patiks", "✦"),
 )
 
+// Šie route'ai slepia bottom bar
+val routesWithoutBottomBar = listOf("dish")
+
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
+    val showBottomBar = routesWithoutBottomBar.none { currentRoute?.startsWith(it) == true }
+
     Scaffold(
         bottomBar = {
-            NavigationBar(containerColor = Color.White) {
-                navItems.forEach { item ->
-                    NavigationBarItem(
-                        selected = currentRoute == item.route,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            if (showBottomBar) {
+                NavigationBar(containerColor = Color.White) {
+                    navItems.forEach { item ->
+                        NavigationBarItem(
+                            selected = currentRoute == item.route,
+                            onClick = {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Text(
-                                item.icon,
-                                color = if (currentRoute == item.route) PrimaryBlue else TextSecondary
+                            },
+                            icon = {
+                                Text(
+                                    item.icon,
+                                    color = if (currentRoute == item.route) PrimaryBlue else TextSecondary
+                                )
+                            },
+                            label = {
+                                Text(
+                                    item.label,
+                                    color = if (currentRoute == item.route) PrimaryBlue else TextSecondary
+                                )
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = Color(0xFFE6F1FB)
                             )
-                        },
-                        label = {
-                            Text(
-                                item.label,
-                                color = if (currentRoute == item.route) PrimaryBlue else TextSecondary
-                            )
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color(0xFFE6F1FB)
                         )
-                    )
+                    }
                 }
             }
         }
@@ -78,18 +86,25 @@ fun AppNavGraph() {
         ) {
             composable("home") {
                 HomeScreen(
-                    onSearchClick = { navController.navigate("search") }
+                    onSearchClick = { navController.navigate("search") },
+                    onDishClick = { dishId -> navController.navigate("dish/$dishId") }
                 )
             }
             composable("search") {
-                SearchScreen()
+                SearchScreen(onDishClick = { dishId -> navController.navigate("dish/$dishId") })
             }
             composable("favorites") {
-                // FavoritesScreen bus vėliau
                 HomeScreen()
             }
             composable("recommend") {
                 SwipeScreen()
+            }
+            composable("dish/{dishId}") { backStackEntry ->
+                val dishId = backStackEntry.arguments?.getString("dishId")?.toIntOrNull() ?: 0
+                DishDetailScreen(
+                    dishId = dishId,
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
     }

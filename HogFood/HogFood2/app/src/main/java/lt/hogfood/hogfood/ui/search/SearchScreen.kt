@@ -44,6 +44,7 @@ import lt.hogfood.hogfood.ui.theme.TextSecondary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
+    onDishClick: (Int) -> Unit = {},
     viewModel: SearchViewModel = viewModel()
 ) {
     val results by viewModel.results.collectAsState()
@@ -55,25 +56,13 @@ fun SearchScreen(
     val dietaryTags by viewModel.dietaryTags.collectAsState()
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
+        modifier = Modifier.fillMaxSize().background(Color.White),
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = 16.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 16.dp)) {
                 Spacer(Modifier.height(16.dp))
-                Text(
-                    "Paieška",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary
-                )
+                Text("Paieška", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
                 Spacer(Modifier.height(12.dp))
                 OutlinedTextField(
                     value = query,
@@ -90,29 +79,17 @@ fun SearchScreen(
                     singleLine = true
                 )
                 Spacer(Modifier.height(16.dp))
-                Text(
-                    "MITYBOS FILTRAI",
-                    fontSize = 11.sp,
-                    color = TextSecondary,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Text("MITYBOS FILTRAI", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(8.dp))
             }
         }
 
         item {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(dietaryTags) { diet ->
-                    FilterChip(
-                        label = diet.title,
-                        selected = selectedDiet?.id == diet.id,
-                        onClick = {
-                            viewModel.setDiet(if (selectedDiet?.id == diet.id) null else diet)
-                        }
-                    )
+                    FilterChip(label = diet.title, selected = selectedDiet?.id == diet.id, onClick = {
+                        viewModel.setDiet(if (selectedDiet?.id == diet.id) null else diet)
+                    })
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -120,62 +97,35 @@ fun SearchScreen(
 
         item {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(
-                    "KATEGORIJOS",
-                    fontSize = 11.sp,
-                    color = TextSecondary,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Text("KATEGORIJOS", fontSize = 11.sp, color = TextSecondary, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(8.dp))
             }
         }
 
         item {
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(categories) { cat ->
-                    FilterChip(
-                        label = cat.title,
-                        selected = selectedCategory?.id == cat.id,
-                        onClick = {
-                            viewModel.setCategory(if (selectedCategory?.id == cat.id) null else cat)
-                        }
-                    )
+                    FilterChip(label = cat.title, selected = selectedCategory?.id == cat.id, onClick = {
+                        viewModel.setCategory(if (selectedCategory?.id == cat.id) null else cat)
+                    })
                 }
             }
             Spacer(Modifier.height(16.dp))
         }
 
         item {
-            Text(
-                "${results.size} rezultatai",
-                fontSize = 13.sp,
-                color = TextSecondary,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
+            Text("${results.size} rezultatai", fontSize = 13.sp, color = TextSecondary, modifier = Modifier.padding(horizontal = 16.dp))
             Spacer(Modifier.height(12.dp))
         }
 
         when {
             isLoading -> item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = PrimaryBlue)
                 }
             }
             results.isEmpty() -> item {
-                Text(
-                    "Nieko nerasta",
-                    color = TextSecondary,
-                    fontSize = 13.sp,
-                    modifier = Modifier.padding(16.dp)
-                )
+                Text("Nieko nerasta", color = TextSecondary, fontSize = 13.sp, modifier = Modifier.padding(16.dp))
             }
             else -> items(results) { dish ->
                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -184,7 +134,7 @@ fun SearchScreen(
                         restaurant = dish.restaurantName,
                         price = "€%.2f".format(dish.price),
                         categoryColor = getCategoryColor(dish.categories.firstOrNull()?.title),
-                        onClick = {}
+                        onClick = { onDishClick(dish.id) }
                     )
                     Spacer(Modifier.height(8.dp))
                 }
@@ -195,64 +145,22 @@ fun SearchScreen(
 
 @Composable
 fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(50.dp),
-        color = if (selected) PrimaryBlue else Color(0xFFE6F1FB),
-        modifier = Modifier.clickable { onClick() }
-    ) {
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            color = if (selected) Color.White else TextSecondary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+    Surface(shape = RoundedCornerShape(50.dp), color = if (selected) PrimaryBlue else Color(0xFFE6F1FB), modifier = Modifier.clickable { onClick() }) {
+        Text(text = label, fontSize = 12.sp, color = if (selected) Color.White else TextSecondary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
     }
 }
 
 @Composable
-fun DishCardHorizontal(
-    name: String,
-    restaurant: String,
-    price: String,
-    categoryColor: Color,
-    onClick: () -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = CardBackground,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-    ) {
-        Row(
-            modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .background(categoryColor, RoundedCornerShape(12.dp))
-            )
+fun DishCardHorizontal(name: String, restaurant: String, price: String, categoryColor: Color, onClick: () -> Unit) {
+    Surface(shape = RoundedCornerShape(16.dp), color = CardBackground, modifier = Modifier.fillMaxWidth().clickable { onClick() }) {
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(modifier = Modifier.size(72.dp).background(categoryColor, RoundedCornerShape(12.dp)))
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    name,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary
-                )
-                Text(
-                    restaurant,
-                    fontSize = 12.sp,
-                    color = TextSecondary
-                )
+                Text(name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
+                Text(restaurant, fontSize = 12.sp, color = TextSecondary)
             }
-            Text(
-                price,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextPrimary
-            )
+            Text(price, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
         }
     }
 }
