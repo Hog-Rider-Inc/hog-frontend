@@ -109,19 +109,8 @@ fun OrderHistoryScreen(
 
 @Composable
 fun OrderCard(order: Order) {
-    val statusColor = when (order.status.lowercase()) {
-        "completed" -> Color(0xFF1D9E75)
-        "pending" -> Color(0xFFEF9F27)
-        "cancelled" -> Color(0xFFE24B4A)
-        else -> TextSecondary
-    }
-
-    val statusLabel = when (order.status.lowercase()) {
-        "completed" -> "Įvykdytas"
-        "pending" -> "Laukiama"
-        "cancelled" -> "Atšauktas"
-        else -> order.status
-    }
+    val statusColor = Color(0xFF1D9E75)
+    val statusLabel = "COMPLETED"
 
     Surface(
         shape = RoundedCornerShape(16.dp),
