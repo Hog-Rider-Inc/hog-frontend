@@ -3,6 +3,7 @@ package lt.hogfood.hogfood.data.repository
 import lt.hogfood.hogfood.data.api.RetrofitClient
 import lt.hogfood.hogfood.data.model.DishDetails
 import lt.hogfood.hogfood.data.model.FoodItem
+import lt.hogfood.hogfood.data.model.Order
 import lt.hogfood.hogfood.data.model.RecommendationItem
 
 class FoodRepository {
@@ -37,5 +38,10 @@ class FoodRepository {
 
     suspend fun dislikeItem(itemId: Int): Result<Unit> = runCatching {
         interactionApi.dislikeItem(itemId = itemId)
+    }
+
+    suspend fun getOrders(clientId: Int): Result<List<Order>> = runCatching {
+        val response = foodApi.getOrders(clientId)
+        response.body() ?: error("Tuščias atsakymas")
     }
 }

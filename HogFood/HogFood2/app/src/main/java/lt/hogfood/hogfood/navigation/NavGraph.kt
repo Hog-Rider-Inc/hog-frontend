@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import lt.hogfood.hogfood.ui.detail.DishDetailScreen
+import lt.hogfood.hogfood.ui.history.OrderHistoryScreen
 import lt.hogfood.hogfood.ui.home.HomeScreen
 import lt.hogfood.hogfood.ui.search.SearchScreen
 import lt.hogfood.hogfood.ui.swipe.SwipeScreen
@@ -94,7 +95,7 @@ fun AppNavGraph() {
                 SearchScreen(onDishClick = { dishId -> navController.navigate("dish/$dishId") })
             }
             composable("history") {
-                HomeScreen()
+                OrderHistoryScreen()
             }
             composable("recommend") {
                 SwipeScreen()
