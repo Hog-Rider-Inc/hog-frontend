@@ -10,11 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import lt.hogfood.hogfood.ui.cart.CartViewModel
 import lt.hogfood.hogfood.ui.detail.DishDetailScreen
 import lt.hogfood.hogfood.ui.history.OrderHistoryScreen
 import lt.hogfood.hogfood.ui.home.HomeScreen
@@ -32,7 +34,6 @@ val navItems = listOf(
     NavItem("recommend", "Tau patiks", "✦"),
 )
 
-// Šie route'ai slepia bottom bar
 val routesWithoutBottomBar = listOf("dish")
 
 @Composable
@@ -40,8 +41,8 @@ fun AppNavGraph() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-
     val showBottomBar = routesWithoutBottomBar.none { currentRoute?.startsWith(it) == true }
+    val cartViewModel: CartViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
@@ -52,39 +53,25 @@ fun AppNavGraph() {
                             selected = currentRoute == item.route,
                             onClick = {
                                 navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
                                 }
                             },
                             icon = {
-                                Text(
-                                    item.icon,
-                                    color = if (currentRoute == item.route) PrimaryBlue else TextSecondary
-                                )
+                                Text(item.icon, color = if (currentRoute == item.route) PrimaryBlue else TextSecondary)
                             },
                             label = {
-                                Text(
-                                    item.label,
-                                    color = if (currentRoute == item.route) PrimaryBlue else TextSecondary
-                                )
+                                Text(item.label, color = if (currentRoute == item.route) PrimaryBlue else TextSecondary)
                             },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = Color(0xFFE6F1FB)
-                            )
+                            colors = NavigationBarItemDefaults.colors(indicatorColor = Color(0xFFE6F1FB))
                         )
                     }
                 }
             }
         }
     ) { padding ->
-        NavHost(
-            navController = navController,
-            startDestination = "home",
-            modifier = Modifier.padding(padding)
-        ) {
+        NavHost(navController = navController, startDestination = "home", modifier = Modifier.padding(padding)) {
             composable("home") {
                 HomeScreen(
                     onSearchClick = { navController.navigate("search") },
@@ -104,7 +91,8 @@ fun AppNavGraph() {
                 val dishId = backStackEntry.arguments?.getString("dishId")?.toIntOrNull() ?: 0
                 DishDetailScreen(
                     dishId = dishId,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    cartViewModel = cartViewModel
                 )
             }
         }

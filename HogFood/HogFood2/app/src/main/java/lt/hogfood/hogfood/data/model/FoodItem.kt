@@ -58,3 +58,12 @@ data class OrderItem(
     val quantity: Int = 1,
     val price: Double = 0.0
 )
+
+data class CartItem(
+    val dishId: Int,
+    val name: String,
+    val restaurantName: String,
+    val price: Double,
+    val imageUrl: String?,
+    val quantity: Int = 1
+)
