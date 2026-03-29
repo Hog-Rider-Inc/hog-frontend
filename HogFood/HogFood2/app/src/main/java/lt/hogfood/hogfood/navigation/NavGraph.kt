@@ -93,7 +93,7 @@ fun AppNavGraph() {
             composable("search") {
                 SearchScreen(onDishClick = { dishId -> navController.navigate("dish/$dishId") })
             }
-            composable("favorites") {
+            composable("history") {
                 HomeScreen()
             }
             composable("recommend") {
