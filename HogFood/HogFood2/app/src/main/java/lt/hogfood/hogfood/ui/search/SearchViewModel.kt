@@ -82,8 +82,8 @@ class SearchViewModel : ViewModel() {
         try {
             val response = foodApi.searchDishes(
                 query = searchQuery,
-                categoryId = category?.id,
-                dietaryTagId = diet?.id
+                category = category?.title,
+                dietary = diet?.title
             )
             if (response.isSuccessful) {
                 _results.value = response.body() ?: emptyList()
