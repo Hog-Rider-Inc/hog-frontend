@@ -72,6 +72,7 @@ val mockRecommendations = listOf(
         title = "Šaltibarščiai",
         restaurant_name = "Gurmanai",
         price = "7.50",
+        description = "Gaivi ir kąsnis maltos daržovės su šaltu burokėlių sultiniu, tradicinis lietuviškas patiekalas.",
         categories = listOf("Sriubos"),
         dietary_tags = listOf("Veganiška")
     ),
@@ -80,6 +81,7 @@ val mockRecommendations = listOf(
         title = "Klasikinis Drama Burger",
         restaurant_name = "Drama Burger",
         price = "13.50",
+        description = "Sultingas jautienos mėsainis su klasikiniu padažu ir traškiais priedais.",
         categories = listOf("Burgeriai"),
         dietary_tags = emptyList()
     ),
@@ -88,6 +90,7 @@ val mockRecommendations = listOf(
         title = "Margarita",
         restaurant_name = "Casa La Familia",
         price = "11.00",
+        description = "Klasikinė Neapolio stiliaus pica su pomidorų padažu ir mocarela.",
         categories = listOf("Picos"),
         dietary_tags = emptyList()
     )

@@ -3,6 +3,7 @@ package lt.hogfood.hogfood.ui.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -16,7 +17,7 @@ import lt.hogfood.hogfood.data.model.Category
 import lt.hogfood.hogfood.data.model.DietaryTag
 import lt.hogfood.hogfood.data.model.FoodItem
 
-@OptIn(FlowPreview::class)
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class SearchViewModel : ViewModel() {
 
     private val foodApi = RetrofitClient.foodApi
@@ -71,6 +72,13 @@ class SearchViewModel : ViewModel() {
             .distinctUntilChanged()
             .mapLatest { (q, cat, diet) -> performSearch(q, cat, diet) }
             .launchIn(viewModelScope)
+    }
+
+    fun refresh() {
+        loadFilters()
+        viewModelScope.launch {
+            performSearch(query.value, selectedCategory.value, selectedDiet.value)
+        }
     }
 
     private suspend fun performSearch(

@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +35,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import lt.hogfood.hogfood.data.model.FoodItem
@@ -42,6 +47,9 @@ import lt.hogfood.hogfood.ui.theme.CardBackground
 import lt.hogfood.hogfood.ui.theme.PrimaryBlue
 import lt.hogfood.hogfood.ui.theme.TextPrimary
 import lt.hogfood.hogfood.ui.theme.TextSecondary
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 
 fun getCategoryColor(category: String?): Color {
     return when {
@@ -63,6 +71,7 @@ fun fixGithubUrl(url: String?): String? {
 }
 
 @Composable
+@OptIn(ExperimentalMaterialApi::class)
 fun HomeScreen(
     onSearchClick: () -> Unit = {},
     onDishClick: (Int) -> Unit = {},
@@ -73,62 +82,90 @@ fun HomeScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().background(Color.White),
-        contentPadding = PaddingValues(bottom = 16.dp)
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isLoading,
+        onRefresh = { viewModel.loadData() }
+    )
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.loadData()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pullRefresh(pullRefreshState)
     ) {
-        item {
-            Box(
-                modifier = Modifier.fillMaxWidth().statusBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Text(text = "Ready to eat like a Hog?", style = MaterialTheme.typography.headlineMedium, color = PrimaryBlue)
-            }
-        }
-
-        if (isLoading) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().background(Color.White),
+            contentPadding = PaddingValues(bottom = 16.dp)
+        ) {
             item {
-                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = PrimaryBlue)
-                }
-            }
-            return@LazyColumn
-        }
-
-        if (error != null) {
-            item { Text("Klaida: $error", color = Color.Red, modifier = Modifier.padding(16.dp)) }
-            return@LazyColumn
-        }
-
-        if (recommendations.isNotEmpty()) {
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier.fillMaxWidth().statusBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-                    Text("✦  Tau gali patikti", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    Text(text = "Ready to eat like a Hog?", style = MaterialTheme.typography.headlineMedium, color = PrimaryBlue)
                 }
+            }
+
+            if (isLoading) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = PrimaryBlue)
+                    }
+                }
+                return@LazyColumn
+            }
+
+            if (error != null) {
+                item { Text("Klaida: $error", color = Color.Red, modifier = Modifier.padding(16.dp)) }
+                return@LazyColumn
+            }
+
+            if (recommendations.isNotEmpty()) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("✦  Tau gali patikti", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
+                item {
+                    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items(recommendations.take(3)) { rec -> RecommendationCardSimple(rec) }
+                    }
+                    Spacer(Modifier.height(24.dp))
+                }
+            }
+
+            item {
+                Text("Visi patiekalai", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary, modifier = Modifier.padding(horizontal = 16.dp))
                 Spacer(Modifier.height(12.dp))
             }
-            item {
-                LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(recommendations.take(3)) { rec -> RecommendationCardSimple(rec) }
-                }
-                Spacer(Modifier.height(24.dp))
+
+            items(foodItems) { item ->
+                FoodCardSimple(item = item, onClick = { onDishClick(item.id) })
+                Spacer(Modifier.height(8.dp))
             }
         }
 
-        item {
-            Text("Visi patiekalai", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextPrimary, modifier = Modifier.padding(horizontal = 16.dp))
-            Spacer(Modifier.height(12.dp))
-        }
-
-        items(foodItems) { item ->
-            FoodCardSimple(item = item, onClick = { onDishClick(item.id) })
-            Spacer(Modifier.height(8.dp))
-        }
+        PullRefreshIndicator(
+            refreshing = isLoading,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }
 
