@@ -27,6 +27,9 @@ jobs:
           echo "sdk.dir=$ANDROID_HOME" > HogFood/HogFood2/local.properties
           echo "RECOMMENDATIONS_BEARER_TOKEN=${{ secrets.BEARER_TOKEN }}" >> HogFood/HogFood2/local.properties
 
+      - name: Build project
+        run: cd HogFood/HogFood2 && ./gradlew assembleDebug
+
       - name: Run unit tests
         run: cd HogFood/HogFood2 && ./gradlew test
 
