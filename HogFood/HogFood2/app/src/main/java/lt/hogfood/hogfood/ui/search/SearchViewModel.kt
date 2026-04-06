@@ -12,15 +12,15 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
-import lt.hogfood.hogfood.data.api.RetrofitClient
 import lt.hogfood.hogfood.data.model.Category
 import lt.hogfood.hogfood.data.model.DietaryTag
 import lt.hogfood.hogfood.data.model.FoodItem
+import lt.hogfood.hogfood.data.repository.FoodRepository
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-class SearchViewModel : ViewModel() {
-
-    private val foodApi = RetrofitClient.foodApi
+class SearchViewModel(
+    private val repository: FoodRepository = FoodRepository()
+) : ViewModel() {
 
     val query = MutableStateFlow("")
     val selectedCategory = MutableStateFlow<Category?>(null)
@@ -46,21 +46,15 @@ class SearchViewModel : ViewModel() {
         setupSearch()
     }
 
-    private fun loadFilters() {
+    fun loadFilters() {
         viewModelScope.launch {
-            try {
-                val categoriesResponse = foodApi.getCategories()
-                if (categoriesResponse.isSuccessful) {
-                    _categories.value = categoriesResponse.body() ?: emptyList()
-                }
+            repository.getCategories()
+                .onSuccess { _categories.value = it }
+                .onFailure { _error.value = "Klaida kraunant filtrus: ${it.message}" }
 
-                val dietaryResponse = foodApi.getDietaryTags()
-                if (dietaryResponse.isSuccessful) {
-                    _dietaryTags.value = dietaryResponse.body() ?: emptyList()
-                }
-            } catch (e: Exception) {
-                _error.value = "Klaida kraunant filtrus: ${e.message}"
-            }
+            repository.getDietaryTags()
+                .onSuccess { _dietaryTags.value = it }
+                .onFailure { _error.value = "Klaida kraunant filtrus: ${it.message}" }
         }
     }
 
@@ -87,30 +81,19 @@ class SearchViewModel : ViewModel() {
         diet: DietaryTag?
     ) {
         _isLoading.value = true
-        try {
-            val response = foodApi.searchDishes(
-                query = searchQuery,
-                category = category?.title,
-                dietary = diet?.title
-            )
-            if (response.isSuccessful) {
-                _results.value = response.body() ?: emptyList()
-            } else {
+        repository.searchDishes(
+            query = searchQuery,
+            category = category?.title,
+            dietary = diet?.title
+        )
+            .onSuccess { _results.value = it }
+            .onFailure {
+                _error.value = "Klaida: ${it.message}"
                 _results.value = emptyList()
             }
-        } catch (e: Exception) {
-            _error.value = "Klaida: ${e.message}"
-            _results.value = emptyList()
-        } finally {
-            _isLoading.value = false
-        }
+        _isLoading.value = false
     }
 
-    fun setCategory(category: Category?) {
-        selectedCategory.value = category
-    }
-
-    fun setDiet(diet: DietaryTag?) {
-        selectedDiet.value = diet
-    }
+    fun setCategory(category: Category?) { selectedCategory.value = category }
+    fun setDiet(diet: DietaryTag?) { selectedDiet.value = diet }
 }
