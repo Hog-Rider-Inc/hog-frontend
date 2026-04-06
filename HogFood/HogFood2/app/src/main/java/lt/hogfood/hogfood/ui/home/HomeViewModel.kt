@@ -11,7 +11,8 @@ import lt.hogfood.hogfood.data.model.RecommendationItem
 import lt.hogfood.hogfood.data.repository.FoodRepository
 
 class HomeViewModel(
-    private val repository: FoodRepository = FoodRepository()
+    private val repository: FoodRepository = FoodRepository(),
+    private val enablePolling: Boolean = true
 ) : ViewModel() {
 
     private val _foodItems = MutableStateFlow<List<FoodItem>>(emptyList())
@@ -28,6 +29,22 @@ class HomeViewModel(
 
     init {
         loadData()
+<<<<<<< Updated upstream
+=======
+        if (enablePolling) startPolling()
+    }
+
+    private fun startPolling() {
+        viewModelScope.launch {
+            while (isActive) {
+                delay(10_000)
+                val newRecs = repository.getRecommendations().getOrNull()
+                if (newRecs != null && newRecs != _recommendations.value) {
+                    _recommendations.value = newRecs
+                }
+            }
+        }
+>>>>>>> Stashed changes
     }
 
     fun loadData() {
