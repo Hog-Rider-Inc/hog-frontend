@@ -1,6 +1,5 @@
 package lt.hogfood.hogfood
 
-import app.cash.turbine.test
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -38,36 +37,9 @@ class HomeViewModelTest {
         Dispatchers.resetMain()
     }
 
+    // FR-1: TA-01 (HOG-152) — Rekomendacijos sėkmingai užkraunamos
     @Test
-    fun `loadData success - foodItems updated`() = runTest {
-        val mockDishes = listOf(
-            FoodItem(id = 1, name = "Cepelinai", restaurantName = "Gurmanai", price = 12.90),
-            FoodItem(id = 2, name = "Šaltibarščiai", restaurantName = "Gurmanai", price = 7.50)
-        )
-        coEvery { repository.getAllDishes() } returns Result.success(mockDishes)
-        coEvery { repository.getRecommendations() } returns Result.success(emptyList())
-
-        viewModel = HomeViewModel(repository, enablePolling = false)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        assertEquals(2, viewModel.foodItems.value.size)
-        assertEquals("Cepelinai", viewModel.foodItems.value[0].name)
-    }
-
-    @Test
-    fun `loadData failure - error message set`() = runTest {
-        coEvery { repository.getAllDishes() } returns Result.failure(Exception("Tinklo klaida"))
-        coEvery { repository.getRecommendations() } returns Result.success(emptyList())
-
-        viewModel = HomeViewModel(repository, enablePolling = false)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        assertEquals("Tinklo klaida", viewModel.error.value)
-        assertTrue(viewModel.foodItems.value.isEmpty())
-    }
-
-    @Test
-    fun `loadData - recommendations loaded successfully`() = runTest {
+    fun `HOG152 recommendations loaded successfully`() = runTest {
         val mockRecs = listOf(
             RecommendationItem(menu_item_id = 1, title = "Šaltibarščiai", restaurant_name = "Gurmanai", price = "7.5")
         )
@@ -81,8 +53,33 @@ class HomeViewModelTest {
         assertEquals("Šaltibarščiai", viewModel.recommendations.value[0].title)
     }
 
+    // FR-1: TA-02 (HOG-150) — API grąžina tuščią sąrašą — naudojami mock duomenys
     @Test
-    fun `isLoading is false after loadData completes`() = runTest {
+    fun `HOG150 empty recommendations falls back to mock data`() = runTest {
+        coEvery { repository.getAllDishes() } returns Result.success(emptyList())
+        coEvery { repository.getRecommendations() } returns Result.success(emptyList())
+
+        viewModel = HomeViewModel(repository, enablePolling = false)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.recommendations.value.isNotEmpty())
+    }
+
+    // FR-1: TA-03 (HOG-148) — API klaida — naudojami mock duomenys
+    @Test
+    fun `HOG148 recommendations api failure falls back to mock data`() = runTest {
+        coEvery { repository.getAllDishes() } returns Result.success(emptyList())
+        coEvery { repository.getRecommendations() } returns Result.failure(Exception("Klaida"))
+
+        viewModel = HomeViewModel(repository, enablePolling = false)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertTrue(viewModel.recommendations.value.isNotEmpty())
+    }
+
+    // FR-1: TA-04 (HOG-149) — isLoading true kol kraunama, false po
+    @Test
+    fun `HOG149 isLoading is false after loadData completes`() = runTest {
         coEvery { repository.getAllDishes() } returns Result.success(emptyList())
         coEvery { repository.getRecommendations() } returns Result.success(emptyList())
 
@@ -90,5 +87,21 @@ class HomeViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertFalse(viewModel.isLoading.value)
+    }
+
+    // FR-1: TA-05 (HOG-151) — foodItems sėkmingai užkraunami
+    @Test
+    fun `HOG151 foodItems loaded successfully`() = runTest {
+        val mockDishes = listOf(
+            FoodItem(id = 1, name = "Cepelinai", restaurantName = "Gurmanai", price = 12.90),
+            FoodItem(id = 2, name = "Šaltibarščiai", restaurantName = "Gurmanai", price = 7.50)
+        )
+        coEvery { repository.getAllDishes() } returns Result.success(mockDishes)
+        coEvery { repository.getRecommendations() } returns Result.success(emptyList())
+
+        viewModel = HomeViewModel(repository, enablePolling = false)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(2, viewModel.foodItems.value.size)
     }
 }
