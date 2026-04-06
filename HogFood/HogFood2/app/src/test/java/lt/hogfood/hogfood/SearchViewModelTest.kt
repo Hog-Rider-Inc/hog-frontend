@@ -112,4 +112,84 @@ class SearchViewModelTest {
 
         assertNotNull(viewModel.error.value)
     }
+
+    // FR-3: TA-01 (HOG-143) — Kategorijos filtras grąžina tik tos kategorijos patiekalus
+    @Test
+    fun `HOG143 category filter returns only matching dishes`() = runTest {
+        val sriubos = Category(id = 3, title = "Sriubos")
+        val filteredDishes = listOf(
+            FoodItem(id = 2, name = "Miso sriuba", restaurantName = "R", price = 4.50, categories = listOf(sriubos)),
+            FoodItem(id = 3, name = "Barščiai", restaurantName = "R", price = 6.50, categories = listOf(sriubos))
+        )
+        coEvery { repository.searchDishes(any(), category = "Sriubos", any()) } returns Result.success(filteredDishes)
+
+        viewModel = SearchViewModel(repository)
+        viewModel.setCategory(sriubos)
+        testDispatcher.scheduler.advanceTimeBy(400)
+        testDispatcher.scheduler.runCurrent()
+
+        assertEquals(2, viewModel.results.value.size)
+        assertTrue(viewModel.results.value.all { it.categories.any { c -> c.title == "Sriubos" } })
+    }
+
+    // FR-3: TA-02 (HOG-144) — Mitybos filtras grąžina tik atitinkančius patiekalus
+    @Test
+    fun `HOG144 dietary filter returns only vegan dishes`() = runTest {
+        val vegTag = DietaryTag(id = 1, title = "Veganiška")
+        val veganDishes = listOf(
+            FoodItem(id = 2, name = "Budos dubuo", restaurantName = "R", price = 10.00, dietaryTags = listOf(vegTag)),
+            FoodItem(id = 3, name = "Avokadų užkandis", restaurantName = "R", price = 8.00, dietaryTags = listOf(vegTag))
+        )
+        coEvery { repository.searchDishes(any(), any(), dietary = "Veganiška") } returns Result.success(veganDishes)
+
+        viewModel = SearchViewModel(repository)
+        viewModel.setDiet(vegTag)
+        testDispatcher.scheduler.advanceTimeBy(400)
+        testDispatcher.scheduler.runCurrent()
+
+        assertEquals(2, viewModel.results.value.size)
+    }
+
+    // FR-3: TA-03 (HOG-145) — Kategorijų sąrašas užkraunamas
+    @Test
+    fun `HOG145 categories list loaded on init`() = runTest {
+        coEvery { repository.getCategories() } returns Result.success(
+            listOf(Category(1, "Sriubos"), Category(2, "Pagrindiniai"))
+        )
+
+        viewModel = SearchViewModel(repository)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(2, viewModel.categories.value.size)
+    }
+
+    // FR-3: TA-04 (HOG-146) — Mitybos tipų sąrašas užkraunamas
+    @Test
+    fun `HOG146 dietary tags list loaded on init`() = runTest {
+        coEvery { repository.getDietaryTags() } returns Result.success(
+            listOf(DietaryTag(1, "Veganiška"), DietaryTag(2, "Vegetariška"))
+        )
+
+        viewModel = SearchViewModel(repository)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(2, viewModel.dietaryTags.value.size)
+    }
+
+    // FR-3: TA-05 (HOG-147) — Filtro išvalymas grąžina visus patiekalus
+    @Test
+    fun `HOG147 clearing category filter returns all dishes`() = runTest {
+        val allDishes = listOf(
+            FoodItem(id = 1, name = "Cepelinai", restaurantName = "R", price = 8.50),
+            FoodItem(id = 2, name = "Sriuba", restaurantName = "R", price = 5.00)
+        )
+        coEvery { repository.searchDishes(any(), category = null, any()) } returns Result.success(allDishes)
+
+        viewModel = SearchViewModel(repository)
+        viewModel.setCategory(null)
+        testDispatcher.scheduler.advanceTimeBy(400)
+        testDispatcher.scheduler.runCurrent()
+
+        assertEquals(2, viewModel.results.value.size)
+    }
 }
