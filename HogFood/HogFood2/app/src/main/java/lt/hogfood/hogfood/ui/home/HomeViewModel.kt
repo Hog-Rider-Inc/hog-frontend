@@ -2,8 +2,10 @@ package lt.hogfood.hogfood.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import lt.hogfood.hogfood.data.mock.mockRecommendations
 import lt.hogfood.hogfood.data.model.FoodItem
@@ -11,7 +13,8 @@ import lt.hogfood.hogfood.data.model.RecommendationItem
 import lt.hogfood.hogfood.data.repository.FoodRepository
 
 class HomeViewModel(
-    private val repository: FoodRepository = FoodRepository()
+    private val repository: FoodRepository = FoodRepository(),
+    private val enablePolling: Boolean = true
 ) : ViewModel() {
 
     private val _foodItems = MutableStateFlow<List<FoodItem>>(emptyList())
@@ -28,6 +31,19 @@ class HomeViewModel(
 
     init {
         loadData()
+        if (enablePolling) startPolling()
+    }
+
+    private fun startPolling() {
+        viewModelScope.launch {
+            while (isActive) {
+                delay(10_000)
+                val newRecs = repository.getRecommendations().getOrNull()
+                if (newRecs != null && newRecs != _recommendations.value) {
+                    _recommendations.value = newRecs
+                }
+            }
+        }
     }
 
     fun loadData() {
@@ -53,7 +69,6 @@ class HomeViewModel(
                     _recommendations.value = it
                 }
                 .onFailure {
-                    android.util.Log.e("HomeViewModel", "Rekomendacijų klaida: ${it.message}")
                     _recommendations.value = mockRecommendations
                 }
 

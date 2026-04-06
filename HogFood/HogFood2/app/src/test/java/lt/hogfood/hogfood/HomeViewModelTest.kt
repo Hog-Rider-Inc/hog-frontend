@@ -47,7 +47,7 @@ class HomeViewModelTest {
         coEvery { repository.getAllDishes() } returns Result.success(mockDishes)
         coEvery { repository.getRecommendations() } returns Result.success(emptyList())
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, enablePolling = false)
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(2, viewModel.foodItems.value.size)
@@ -59,7 +59,7 @@ class HomeViewModelTest {
         coEvery { repository.getAllDishes() } returns Result.failure(Exception("Tinklo klaida"))
         coEvery { repository.getRecommendations() } returns Result.success(emptyList())
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, enablePolling = false)
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals("Tinklo klaida", viewModel.error.value)
@@ -74,7 +74,7 @@ class HomeViewModelTest {
         coEvery { repository.getAllDishes() } returns Result.success(emptyList())
         coEvery { repository.getRecommendations() } returns Result.success(mockRecs)
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, enablePolling = false)
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertEquals(1, viewModel.recommendations.value.size)
@@ -86,7 +86,7 @@ class HomeViewModelTest {
         coEvery { repository.getAllDishes() } returns Result.success(emptyList())
         coEvery { repository.getRecommendations() } returns Result.success(emptyList())
 
-        viewModel = HomeViewModel(repository)
+        viewModel = HomeViewModel(repository, enablePolling = false)
         testDispatcher.scheduler.advanceUntilIdle()
 
         assertFalse(viewModel.isLoading.value)
