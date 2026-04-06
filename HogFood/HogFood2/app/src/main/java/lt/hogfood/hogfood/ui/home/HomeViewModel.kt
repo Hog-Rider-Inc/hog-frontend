@@ -66,7 +66,7 @@ class HomeViewModel(
             repository.getRecommendations()
                 .onSuccess {
                     println("Rekomendacijos gautos: ${it.size}")
-                    _recommendations.value = it
+                    _recommendations.value = if (it.isNotEmpty()) it else mockRecommendations
                 }
                 .onFailure {
                     _recommendations.value = mockRecommendations
