@@ -38,9 +38,9 @@ class OrderHistoryViewModelTest {
         Dispatchers.resetMain()
     }
 
-    // FR-19: TA-01 — Užsakymų sąrašas rodomas kai yra užsakymų
+    // FR-19: TA-01 (HOG-138) — Užsakymai sėkmingai užkraunami
     @Test
-    fun `orders loaded successfully when user has orders`() = runTest {
+    fun `HOG138 orders loaded successfully when user has orders`() = runTest {
         val mockOrders = listOf(
             Order(id = 1, status = "Delivered", totalPrice = 20.00, createdAt = "2026-03-29T17:40:33"),
             Order(id = 2, status = "Preparing", totalPrice = 21.50, createdAt = "2026-03-29T17:40:33"),
@@ -55,9 +55,9 @@ class OrderHistoryViewModelTest {
         assertEquals("Delivered", viewModel.orders.value[0].status)
     }
 
-    // FR-19: TA-02 — Tuščias sąrašas kai nėra užsakymų
+    // FR-19: TA-02 (HOG-139) — Tuščias sąrašas kai nėra užsakymų
     @Test
-    fun `empty list shown when user has no orders`() = runTest {
+    fun `HOG139 empty list shown when user has no orders`() = runTest {
         coEvery { repository.getOrders(1) } returns Result.success(emptyList())
 
         viewModel = OrderHistoryViewModel(repository, enablePolling = false)
@@ -67,9 +67,9 @@ class OrderHistoryViewModelTest {
         assertFalse(viewModel.isLoading.value)
     }
 
-    // FR-19: TA-03 — Klaida rodoma kai API neprieinamas
+    // FR-19: TA-03 (HOG-140) — Klaida rodoma kai API neprieinamas
     @Test
-    fun `error state set when api fails`() = runTest {
+    fun `HOG140 error state set when api fails`() = runTest {
         coEvery { repository.getOrders(1) } returns Result.failure(Exception("Tinklo klaida"))
 
         viewModel = OrderHistoryViewModel(repository, enablePolling = false)
@@ -79,9 +79,9 @@ class OrderHistoryViewModelTest {
         assertEquals("Tinklo klaida", viewModel.error.value)
     }
 
-    // FR-19: TA-04 — Užsakymų rikiavimas — naujausi viršuje
+    // FR-19: TA-04 (HOG-141) — Užsakymai surikiuoti naujausi viršuje
     @Test
-    fun `orders are sorted newest first`() = runTest {
+    fun `HOG141 orders are sorted newest first`() = runTest {
         val mockOrders = listOf(
             Order(id = 5, status = "pending_acceptance", totalPrice = 30.00, createdAt = "2026-03-29T17:40:33"),
             Order(id = 1, status = "Delivered", totalPrice = 20.00, createdAt = "2026-03-29T17:40:33")
@@ -91,13 +91,12 @@ class OrderHistoryViewModelTest {
         viewModel = OrderHistoryViewModel(repository, enablePolling = false)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // Naujausi (didesnis ID) viršuje
         assertEquals(5, viewModel.orders.value[0].id)
     }
 
-    // FR-19: TA-05 — isLoading false po krovimo
+    // FR-19: TA-05 (HOG-142) — isLoading false po krovimo
     @Test
-    fun `isLoading is false after orders load`() = runTest {
+    fun `HOG142 isLoading is false after orders load`() = runTest {
         coEvery { repository.getOrders(1) } returns Result.success(emptyList())
 
         viewModel = OrderHistoryViewModel(repository, enablePolling = false)
