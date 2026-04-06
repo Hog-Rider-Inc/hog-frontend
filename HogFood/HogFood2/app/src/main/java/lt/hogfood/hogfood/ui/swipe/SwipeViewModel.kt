@@ -36,9 +36,13 @@ class SwipeViewModel : ViewModel() {
                 .onSuccess { item ->
                     if (item == null) {
                         _finished.value = true
+                        _currentItem.value = null
                     } else {
                         _finished.value = false
-                        _currentItem.value = item
+                        val enrichedItem = repository.getDishById(item.menu_item_id)
+                            .map { details -> item.copy(description = details.description) }
+                            .getOrElse { item }
+                        _currentItem.value = enrichedItem
                     }
                 }
                 .onFailure { e ->
@@ -46,6 +50,10 @@ class SwipeViewModel : ViewModel() {
                 }
             _isLoading.value = false
         }
+    }
+
+    fun refresh() {
+        loadItem()
     }
 
     fun like() {

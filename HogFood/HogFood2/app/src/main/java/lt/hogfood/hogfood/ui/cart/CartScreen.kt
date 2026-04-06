@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -52,7 +53,10 @@ import lt.hogfood.hogfood.ui.theme.TextSecondary
 @Composable
 fun CartScreen(cartViewModel: CartViewModel) {
     val items by cartViewModel.items.collectAsState()
+    val isPlacingOrder by cartViewModel.isPlacingOrder.collectAsState()
+    val orderError by cartViewModel.orderError.collectAsState()
     var showSuccessDialog by remember { mutableStateOf(false) }
+
 
     if (showSuccessDialog) {
         AlertDialog(
@@ -186,20 +190,41 @@ fun CartScreen(cartViewModel: CartViewModel) {
 
                     Spacer(Modifier.height(12.dp))
 
+                    if (orderError != null) {
+                        Text(
+                            "Klaida: $orderError",
+                            color = Color.Red,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+
                     Surface(
-                        onClick = { showSuccessDialog = true },
+                        onClick = {
+                            if (!isPlacingOrder) {
+                                cartViewModel.placeOrder(onSuccess = { showSuccessDialog = true })
+                            }
+                        },
                         shape = RoundedCornerShape(50.dp),
-                        color = PrimaryBlue,
+                        color = if (isPlacingOrder) PrimaryBlue.copy(alpha = 0.6f) else PrimaryBlue,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                "Užsakyti · €%.2f".format(cartViewModel.totalPrice + 2.99 + 0.99),
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                modifier = Modifier.padding(vertical = 14.dp)
-                            )
+                            if (isPlacingOrder) {
+                                CircularProgressIndicator(
+                                    color = Color.White,
+                                    modifier = Modifier.padding(vertical = 10.dp).size(24.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Text(
+                                    "Užsakyti · €%.2f".format(cartViewModel.totalPrice + 2.99 + 0.99),
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.padding(vertical = 14.dp)
+                                )
+                            }
                         }
                     }
                 }
