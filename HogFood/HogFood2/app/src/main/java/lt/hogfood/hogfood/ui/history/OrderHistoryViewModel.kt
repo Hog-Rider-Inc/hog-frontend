@@ -2,8 +2,10 @@ package lt.hogfood.hogfood.ui.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import lt.hogfood.hogfood.data.model.Order
 import lt.hogfood.hogfood.data.repository.FoodRepository
@@ -24,9 +26,7 @@ class OrderHistoryViewModel(
 
     init {
         loadOrders()
-<<<<<<< Updated upstream
-=======
-        if(enablePolling) startPolling()
+        if (enablePolling) startPolling()
     }
 
     private fun startPolling() {
@@ -39,7 +39,6 @@ class OrderHistoryViewModel(
                 }
             }
         }
->>>>>>> Stashed changes
     }
 
     fun loadOrders() {

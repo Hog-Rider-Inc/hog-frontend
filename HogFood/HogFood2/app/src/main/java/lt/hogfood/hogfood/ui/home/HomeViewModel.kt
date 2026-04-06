@@ -2,8 +2,10 @@ package lt.hogfood.hogfood.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import lt.hogfood.hogfood.data.mock.mockRecommendations
 import lt.hogfood.hogfood.data.model.FoodItem
@@ -29,8 +31,6 @@ class HomeViewModel(
 
     init {
         loadData()
-<<<<<<< Updated upstream
-=======
         if (enablePolling) startPolling()
     }
 
@@ -44,7 +44,6 @@ class HomeViewModel(
                 }
             }
         }
->>>>>>> Stashed changes
     }
 
     fun loadData() {
@@ -70,7 +69,6 @@ class HomeViewModel(
                     _recommendations.value = it
                 }
                 .onFailure {
-                    android.util.Log.e("HomeViewModel", "Rekomendacijų klaida: ${it.message}")
                     _recommendations.value = mockRecommendations
                 }
 
