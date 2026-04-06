@@ -8,9 +8,9 @@ import kotlinx.coroutines.launch
 import lt.hogfood.hogfood.data.model.RecommendationItem
 import lt.hogfood.hogfood.data.repository.FoodRepository
 
-class SwipeViewModel : ViewModel() {
-
-    private val repository = FoodRepository()
+class SwipeViewModel(
+    private val repository: FoodRepository = FoodRepository()
+) : ViewModel() {
 
     private val _currentItem = MutableStateFlow<RecommendationItem?>(null)
     val currentItem = _currentItem.asStateFlow()

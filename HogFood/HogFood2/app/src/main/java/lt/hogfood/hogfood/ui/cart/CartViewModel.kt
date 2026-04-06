@@ -5,13 +5,16 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import lt.hogfood.hogfood.data.api.FoodApi
 import lt.hogfood.hogfood.data.api.RetrofitClient
 import lt.hogfood.hogfood.data.model.CartItem
 import lt.hogfood.hogfood.data.model.DishDetails
 import lt.hogfood.hogfood.data.model.OrderedMenuItem
 import lt.hogfood.hogfood.data.model.OrderRequest
 
-class CartViewModel : ViewModel() {
+class CartViewModel(
+    private val foodApi: FoodApi = RetrofitClient.foodApi
+) : ViewModel() {
 
     private val _items = MutableStateFlow<List<CartItem>>(emptyList())
     val items = _items.asStateFlow()
@@ -21,8 +24,6 @@ class CartViewModel : ViewModel() {
 
     private val _orderError = MutableStateFlow<String?>(null)
     val orderError = _orderError.asStateFlow()
-
-    private val foodApi = RetrofitClient.foodApi
 
     val totalPrice: Double
         get() = _items.value.sumOf { it.price * it.quantity }

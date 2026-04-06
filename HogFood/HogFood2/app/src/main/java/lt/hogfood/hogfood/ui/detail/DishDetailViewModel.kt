@@ -8,9 +8,9 @@ import kotlinx.coroutines.launch
 import lt.hogfood.hogfood.data.model.DishDetails
 import lt.hogfood.hogfood.data.repository.FoodRepository
 
-class DishDetailViewModel : ViewModel() {
-
-    private val repository = FoodRepository()
+class DishDetailViewModel(
+    private val repository: FoodRepository = FoodRepository()
+) : ViewModel() {
 
     private val _dish = MutableStateFlow<DishDetails?>(null)
     val dish = _dish.asStateFlow()
