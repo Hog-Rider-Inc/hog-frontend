@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
 }
 
 android {
@@ -37,6 +38,10 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+detekt {
+    ignoreFailures = true
 }
 
 dependencies {
